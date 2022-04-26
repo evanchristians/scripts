@@ -7,6 +7,7 @@ import {pad} from "./util/helpers.js";
 const exec = promisify(cp.exec);
 const {stdout} = process;
 
+/** @todo: handle path & file extension errors */
 const build = async () => {
   const files = fs.readdirSync("./src/scripts");
 

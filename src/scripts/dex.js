@@ -9,20 +9,23 @@ cp.exec("docker ps --format '{{.Names}}'", async (error, stdout) => {
 
   const containers = stdout.split(/\n/).filter(s => s.length);
 
-  const selection = await inquirer.prompt([
-    {
-      name: "container",
-      type: "list",
-      choices: containers.map(container => ({
-        name: container,
-        value: container,
-      })),
-    },
-  ]);
-
-  if (selection.container) {
-    cp.spawnSync("docker", ["exec", "-ti", selection.container, "bash"], {
-      stdio: "inherit",
-    });
+  try {
+    const selection = await inquirer.prompt([
+      {
+        name: "container",
+        type: "list",
+        choices: containers.map(container => ({
+          name: container,
+          value: container,
+        })),
+      },
+    ]);
+    if (selection?.container) {
+      cp.spawnSync("docker", ["exec", "-ti", selection.container, "bash"], {
+        stdio: "inherit",
+      });
+    }
+  } catch (e) {
+    console.log(e);
   }
 });
