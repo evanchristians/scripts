@@ -1,5 +1,5 @@
 import fs from "fs";
-import chalk from "chalk";
+import c from "chalk";
 import {promisify} from "util";
 import cp from "child_process";
 import {pad} from "./util/helpers.js";
@@ -13,13 +13,13 @@ const build = async () => {
 
   for (const file of files) {
     try {
-      stdout.write(pad(file, chalk.yellow("building")));
+      stdout.write(pad(`building ${c.greenBright(file)}`, `[${c.yellow(" wait ")}]`));
       await exec(
         `pkg ./src/scripts/${file} -o ./bin/${file.replace(/.js/, "")}`,
       );
       stdout.clearLine();
       stdout.cursorTo(0);
-      stdout.write(pad(file, chalk.green("ok")) + "\n");
+      stdout.write(pad(`building ${c.greenBright(file)}`, `[${c.greenBright(" ok ")}]`) + "\n");
     } catch (err) {
       console.error(err);
     }
