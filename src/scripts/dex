@@ -1,0 +1,44 @@
+#!/usr/bin/env node
+
+const inquirer = require("inquirer");
+const cp = require("node:child_process");
+const c = require("chalk");
+
+inquirer.registerPrompt("search-list", require("inquirer-search-list"));
+
+cp.exec("docker ps --format '{{.Names}}'", async (error, stdout) => {
+  if (error) {
+    console.error(error.message);
+    return;
+  }
+
+  const containers = stdout.split(/\n/).filter(s => s.length);
+
+  if (!containers.length) {
+    console.error(c.red("no running containers."));
+    return;
+  }
+
+  try {
+    const selection = await inquirer.prompt([
+      {
+        name: "container",
+        type: "search-list",
+        message: "Containers: ",
+        choices: containers.map(container => ({
+          name: container
+            .replace(/(infrastructure_|_[\d])/g, "")
+            .replace(/-/, " "),
+          value: container,
+        })),
+      },
+    ]);
+    if (selection?.container) {
+      cp.spawnSync("docker", ["exec", "-ti", selection.container, "bash"], {
+        stdio: "inherit",
+      });
+    }
+  } catch (e) {
+    console.log(e);
+  }
+});

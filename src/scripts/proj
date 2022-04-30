@@ -1,0 +1,37 @@
+#!/usr/bin/env node
+
+const fs = require("fs");
+const homedir = require("os").homedir();
+const inquirer = require("inquirer");
+const cp = require("child_process");
+const log = console.log;
+
+inquirer.registerPrompt("search-list", require("inquirer-search-list"));
+
+const PROJECTS_DIR = `${homedir}/dev/infrastructure/services/lws/project`;
+
+const folders = fs.readdirSync(PROJECTS_DIR);
+const exclude = [".gitignore", "integrate"];
+
+inquirer
+  .prompt([
+    {
+      name: "project",
+      type: "search-list",
+      message: "Projects: ",
+      choices: folders
+        .map(folder => ({
+          name: folder,
+          value: folder,
+        }))
+        .filter(folder => !exclude.includes(folder.value)),
+    },
+  ])
+  .then(selection => {
+    if (selection?.project)
+      cp.spawn("zsh", ["-i"], {
+        cwd: `${PROJECTS_DIR}/${selection.project}`,
+        stdio: "inherit",
+      });
+  })
+  .catch(e => log(e));
